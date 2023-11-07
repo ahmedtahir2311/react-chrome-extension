@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Cross Check",
+  "version": "1.0.0",
+  "description": "Cross Check Extension",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "64": "icon.png",
+    "128": "icon.png"
+  },
+  "author": { "email": "mahmed23nov@gmail.com" },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Cross Check",
+    "default_icon": "icon.png"
+  }
+}
