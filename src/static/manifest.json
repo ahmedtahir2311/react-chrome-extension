@@ -14,5 +14,21 @@
     "default_popup": "index.html",
     "default_title": "Cross Check",
     "default_icon": "icon.png"
+  },
+  "host_permissions": ["<all_urls>"],
+
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "webRequest",
+    "geolocation"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
   }
 }
