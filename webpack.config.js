@@ -11,8 +11,8 @@ module.exports = {
     index: path.resolve("./src/components/index.tsx"),
     // options: path.resolve("./src/options/index.tsx"),
     background: path.resolve("./src/background/index.ts"),
-    // "content-script": path.resolve("./src/content-script/index.ts"),
-    // inject: path.resolve("./src/inject/index.ts"),
+    "content-script": path.resolve("./src/content-script/index.ts"),
+    inject: path.resolve("./src/inject/index.ts"),
   },
   module: {
     rules: [
