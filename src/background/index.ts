@@ -6,19 +6,55 @@ chrome.runtime.onInstalled.addListener(() => {
 // });
 
 //Reading Out Consoles
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  const senderTab = sender.tab.id.toString();
+  const existingData = await chrome.storage.sync.get([senderTab]);
+
   // Assuming message.type is 'CONSOLE_LOG'
   if (message.type === "CONSOLE_LOG") {
-    console.log("Log from the content script:", message.args);
     // Storage of Console Log will be happen here
-    // chrome.runtime.sendMessage(message);
+    await chrome.storage.sync.set({
+      ...existingData,
+      [senderTab]: {
+        ...(existingData[senderTab] || {}),
+        consoles: {
+          ...(existingData[senderTab]?.consoles || {}),
+          logs: [
+            ...(existingData[senderTab]?.consoles?.logs || []),
+            message.args.join(","),
+          ],
+        },
+      },
+    });
   } else if (message.type === "CONSOLE_ERROR") {
-    console.log("ERROR from the content script:", message.args);
     // Storage of Console Log will be happen here
-    // chrome.runtime.sendMessage(message);
+    await chrome.storage.sync.set({
+      ...existingData,
+      [senderTab]: {
+        ...(existingData[senderTab] || {}),
+        consoles: {
+          ...(existingData[senderTab]?.consoles || {}),
+          errors: [
+            ...(existingData[senderTab]?.consoles?.errors || []),
+            message.args.join(","),
+          ],
+        },
+      },
+    });
   } else if (message.type === "CONSOLE_WARN") {
-    console.log("WARN from the content script:", message.args);
     // Storage of Console Log will be happen here
-    // chrome.runtime.sendMessage(message);
+    await chrome.storage.sync.set({
+      ...existingData,
+      [senderTab]: {
+        ...(existingData[senderTab] || {}),
+        consoles: {
+          ...(existingData[senderTab]?.consoles || {}),
+          warns: [
+            ...(existingData[senderTab]?.consoles?.warns || []),
+            message.args.join(","),
+          ],
+        },
+      },
+    });
   }
 });

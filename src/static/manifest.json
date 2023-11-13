@@ -25,7 +25,8 @@
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",
     "webRequest",
-    "geolocation"
+    "geolocation",
+    "unlimitedStorage"
   ],
 
   "background": {
