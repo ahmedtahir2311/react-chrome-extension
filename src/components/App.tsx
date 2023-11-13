@@ -1,36 +1,60 @@
 import React, { useState } from "react";
+import CaptureScreenshot from "./components/capture-screenshot";
+import ScreenRecording from "./components/screen-recording";
+import Logo from "./assets/icons/logo";
+import InstantReplay from "./components/instant-replay";
+import SettingIcon from "./assets/icons/setting-icon";
+import Modal from "./components/Modal";
 
 const App = () => {
-  const [coordinates, setCoordinates] = useState("");
-
-  function getInternetSpeedCategory() {
-    if ("connection" in navigator && navigator["connection"]) {
-      const connection = navigator["connection"] as any; // Explicitly specify the type as 'any'
-      const downlink = connection.downlink;
-      let connectionSpeed = "";
-      if (downlink <= 0 || !downlink) {
-        connectionSpeed = "No Internet";
-      } else if (downlink <= 10) {
-        connectionSpeed = "Slow";
-      } else if (downlink >= 10 && downlink <= 100) {
-        connectionSpeed = "Medium";
-      } else if (downlink >= 100) {
-        connectionSpeed = "Fast";
-      }
-      setCoordinates(`${connectionSpeed} (${connection.effectiveType}) `);
-      return `${connectionSpeed} (${connection.effectiveType}) `;
-    }
-  }
-
+  const [modal, setModal] = useState<{ open: boolean; type?: string }>({
+    open: false,
+  });
   return (
-    <div>
-      <img src="banner.png"></img>
-      <h1 className="text-4xl text-green-500">{coordinates}</h1>
+    <>
+      <div className="data-body p-5">
+        <div className="mb-5">
+          <Logo />
+        </div>
+        <div className="flex flex-col gap-5 justify-center mb-4">
+          <CaptureScreenshot
+            setModal={() => {
+              setModal({ open: true, type: "screenshot" });
+            }}
+          />
+          <ScreenRecording
+            setModal={() => {
+              setModal({ open: true, type: "recording" });
+            }}
+          />
+          <InstantReplay
+            setModal={() => {
+              setModal({ open: true, type: "instantReplay" });
+            }}
+          />
+        </div>
 
-      <button className="btn" onClick={getInternetSpeedCategory}>
-        click me{" "}
-      </button>
-    </div>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2.5 cursor-pointer">
+            <SettingIcon />
+            <p className="text-base font-semibold	text-neutral-700"> Settings</p>
+          </div>
+          <p className="text-base font-semibold	text-neutral-700 cursor-pointer	">
+            Go to App
+          </p>
+        </div>
+      </div>
+      {modal?.open && (
+        <Modal
+          open={modal?.open}
+          handleClose={() => {
+            setModal({ open: false });
+          }}
+        >
+          <p>This is Modal Body</p>
+        </Modal>
+      )}
+    </>
   );
 };
 

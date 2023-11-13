@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    height: 100px;
-    width: 400px;
+.data-body  {
+    height: 323px;
+    width: 340px;
     padding:10px;
     border-radius: 10px;
 }
