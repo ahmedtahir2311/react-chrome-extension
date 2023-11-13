@@ -1,9 +1,9 @@
 chrome.runtime.onInstalled.addListener(() => {
   console.log("I am installed ", chrome, navigator);
 });
-chrome.browserAction.onClicked.addListener(() => {
-  console.log("Extension Clicked");
-});
+// chrome.browserAction.onClicked.addListener(() => {
+//   console.log("Extension Clicked");
+// });
 
 //Reading Out Consoles
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
