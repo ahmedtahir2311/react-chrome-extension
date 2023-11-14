@@ -12,7 +12,6 @@ injectScript(chrome.runtime.getURL("inject.js"), "body");
 
 // Listen for messages from the inject.js script
 window.addEventListener("message", async (event) => {
-  console.log({ event });
   // Only accept messages from the same frame
   if (event.source === window && event.data.type) {
     // Ensure that the message sending is wrapped in a try-catch block

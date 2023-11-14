@@ -1,15 +1,11 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("I am installed ", chrome, navigator);
+  console.log("CrossCheck-Installed ", chrome, navigator);
 });
-// chrome.browserAction.onClicked.addListener(() => {
-//   console.log("Extension Clicked");
-// });
 
 //Reading Out Consoles
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const senderTab = sender.tab.id.toString();
   const existingData = await chrome.storage.sync.get([senderTab]);
-
   // Assuming message.type is 'CONSOLE_LOG'
   if (message.type === "CONSOLE_LOG") {
     // Storage of Console Log will be happen here
@@ -21,7 +17,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
           ...(existingData[senderTab]?.consoles || {}),
           logs: [
             ...(existingData[senderTab]?.consoles?.logs || []),
-            message.args.join(","),
+            ...message.args,
           ],
         },
       },
@@ -36,7 +32,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
           ...(existingData[senderTab]?.consoles || {}),
           errors: [
             ...(existingData[senderTab]?.consoles?.errors || []),
-            message.args.join(","),
+            ...message.args,
           ],
         },
       },
@@ -51,10 +47,14 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
           ...(existingData[senderTab]?.consoles || {}),
           warns: [
             ...(existingData[senderTab]?.consoles?.warns || []),
-            message.args.join(","),
+            ...message.args,
           ],
         },
       },
     });
   }
+
+  sendResponse(existingData);
 });
+
+console.log(chrome.webRequest);
