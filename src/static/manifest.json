@@ -26,12 +26,13 @@
     "declarativeNetRequestFeedback",
     "webRequest",
     "geolocation",
-    "unlimitedStorage"
+    "unlimitedStorage",
+    "debugger"
   ],
-
   "background": {
     "service_worker": "background.js"
   },
+
   "web_accessible_resources": [
     {
       "resources": ["inject.js"],
