@@ -1,4 +1,4 @@
-// import { deleteOldRecords } from "./helper";
+// import { getUserLocation } from './helper';
 
 let db = null;
 
@@ -295,6 +295,8 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         ],
       },
     });
+  } else if (message.type === 'USER_ACTION') {
+    console.log('User action detected:', message);
   }
   // deleteOldRecords(timestamp, existingTabData);
 });

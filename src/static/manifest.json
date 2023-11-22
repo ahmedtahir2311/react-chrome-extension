@@ -27,7 +27,8 @@
     "webRequest",
     "geolocation",
     "unlimitedStorage",
-    "debugger"
+    "debugger",
+    "geolocation"
   ],
   "background": {
     "service_worker": "background.js"

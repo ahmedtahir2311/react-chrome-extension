@@ -30,3 +30,25 @@ window.XMLHttpRequest.prototype.open = function (method, url) {
   });
   return originalXHROpen.apply(this, arguments);
 };
+
+document.addEventListener(
+  'click',
+  (event) => {
+    const targetElement = event.target;
+    let elementDetails = {
+      // @ts-ignore
+      tagName: targetElement.tagName,
+      // @ts-ignore
+      id: targetElement.id,
+      // @ts-ignore
+      classNames: targetElement.className,
+      timeStamp: event.timeStamp,
+    };
+
+    window.postMessage(
+      { type: 'USER_ACTION', action: 'click', details: elementDetails },
+      '*'
+    );
+  },
+  false
+);
