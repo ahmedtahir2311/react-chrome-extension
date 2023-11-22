@@ -88,7 +88,7 @@ function getScreenDimensions() {
 //get Connection Speed and Type
 function getInternetSpeedCategory() {
   if ("connection" in navigator && navigator["connection"]) {
-    const connection = navigator["connection"] as any; // Explicitly specify the type as 'any'
+    const connection: any = navigator["connection"];
     const downlink = connection.downlink;
     let connectionSpeed = "";
     if (downlink <= 0 || !downlink) {
@@ -103,3 +103,26 @@ function getInternetSpeedCategory() {
     return `${connectionSpeed} (${connection.effectiveType}) `;
   }
 }
+
+export const deleteOldRecords = (currentTime, existingTabData) => {
+  const threshold = 2 * 60 * 1000; // 2 minutes in milliseconds
+
+  function filterOldRecords(records) {
+    return records.filter((record) => {
+      const recordTime = new Date(record.timestamp).getTime();
+      return currentTime - recordTime <= threshold;
+    });
+  }
+
+  const updatedTabData = {
+    ...existingTabData,
+    consoles: {
+      logs: filterOldRecords(existingTabData?.consoles?.logs || []),
+      errors: filterOldRecords(existingTabData?.consoles?.errors || []),
+      warns: filterOldRecords(existingTabData?.consoles?.warns || []),
+    },
+  };
+  console.log({ updatedTabData });
+
+  return updatedTabData;
+};
