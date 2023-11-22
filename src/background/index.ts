@@ -1,17 +1,134 @@
+// import { deleteOldRecords } from "./helper";
+
+let db = null;
+
 chrome.runtime.onInstalled.addListener(() => {
-  // console.log(
-  //   "CrossCheck-Installed ",
-  //   chrome,
-  //   chrome.declarativeNetRequest,
-  //   navigator
-  // );
-  //if devools is available
-  if (!chrome.devtools || !chrome.devtools.panels) {
-    console.log("Developer Tools API not available");
-  } else {
-    // Open the Developer Tools
-    console.log(chrome.devtools.panels);
-  }
+  console.log("CrossCheck-Installed ");
+
+  const dbName = "crosscheck-testDB";
+  const dbVersion = 1;
+
+  const dbOpenRequest = indexedDB.open(dbName, dbVersion);
+  dbOpenRequest.onupgradeneeded = (e) => {
+    //Making a Table
+    db = dbOpenRequest.result;
+    db.createObjectStore("tabs_records", {
+      keyPath: "tabId",
+      // autoIncrement: true,
+    });
+  };
+  dbOpenRequest.onsuccess = () => {
+    db = dbOpenRequest.result;
+
+    //Opening a Tranction
+    const transaction = db.transaction(["tabs_records"], "readwrite");
+    const tabs_records = transaction.objectStore("tabs_records");
+    db.tabs_records = tabs_records;
+
+    //making a Generic Add Function
+    db.add = (
+      payload,
+      tableName = "tabs_records",
+      permission = "readwrite"
+    ) => {
+      const transaction = db.transaction([tableName], permission);
+      const tx = transaction.objectStore(tableName);
+
+      //Adding Results
+      const addRequest = tx.add({ ...payload });
+      //onSucess
+      addRequest.onsuccess = (event) => {
+        // console.log("Record Added Success : ", event);
+        return event.target.result;
+      };
+      //onFailed
+      addRequest.onerror = (event) => {
+        // console.error("Record Addition Failed : ", event.target.error);
+        return event.target.error;
+      };
+    };
+
+    //making a Generic Put Function
+    db.put = (
+      payload,
+      tableName = "tabs_records",
+      permission = "readwrite"
+    ) => {
+      const transaction = db.transaction([tableName], permission);
+      const tx = transaction.objectStore(tableName);
+      //Adding Results
+      const putRequest = tx.put({ ...payload });
+      //onSucess
+      putRequest.onsuccess = (event) => {
+        // console.log("Record Updating Success : ", event);
+        return event.target.result;
+      };
+      //onFailed
+      putRequest.onerror = (event) => {
+        // console.error("Record Updating Failed : ", event.target.error);
+        return event.target.error;
+      };
+    };
+
+    //making a Generic for getById #tabId passed
+    db.getById = (
+      tabId,
+      tableName = "tabs_records",
+      permission = "readwrite"
+    ) => {
+      try {
+        //Opening a Tranction
+        const transaction = db.transaction([tableName], permission);
+        const tx = transaction.objectStore(tableName);
+        //onSuccess
+        return new Promise((resolve, reject) => {
+          const getByIdRequest = tx.get(tabId);
+
+          // onSuccess
+          getByIdRequest.onsuccess = (event) => {
+            const result = event.target.result || {};
+            resolve(result);
+          };
+
+          // onError
+          getByIdRequest.onerror = (event) => {
+            reject(event.target.error);
+          };
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    //making a Generic for GetAll Function  #tabId not passed
+    db.getAll = (tableName = "tabs_records", permission = "readwrite") => {
+      try {
+        const transaction = db.transaction([tableName], permission);
+        const tx = transaction.objectStore(tableName);
+
+        return new Promise((resolve, reject) => {
+          const getAllRequest = tx.getAll();
+          //onSuccess
+          getAllRequest.onsuccess = (event) => {
+            const result = event.target.result || {};
+            resolve(result);
+          };
+          //onFailed
+          getAllRequest.onerror = (event) => {
+            console.error("Record Fetching Failed : ", event.target.error);
+            reject(event.target.error);
+          };
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  };
+
+  dbOpenRequest.onerror = (e) => {
+    db = null;
+    console.error("Error Creating Index Db ", dbOpenRequest);
+  };
 });
 
 const captureNetworkData = () => {
@@ -108,7 +225,6 @@ const captureNetworkData = () => {
             responseHeaders: responseDetails.responseHeaders,
             // responseBody,
           };
-          console.log(tabRequests[tabId]);
 
           //  #todo storage the data in chrome.storage.sync.get()
           // chrome.storage.sync
@@ -134,58 +250,49 @@ captureNetworkData();
 
 //Reading Out Consoles
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  const senderTab = sender.tab.id.toString();
-  const existingData = await chrome.storage.sync.get([senderTab]);
+  const existingTabData = await db.getById(sender.tab.id);
+  const timestamp = new Date().toISOString();
+
   // Assuming message.type is 'CONSOLE_LOG'
   if (message.type === "CONSOLE_LOG") {
     // Storage of Console Log will be happen here
-    await chrome.storage.sync.set({
-      ...existingData,
-      [senderTab]: {
-        ...(existingData[senderTab] || {}),
-        consoles: {
-          ...(existingData[senderTab]?.consoles || {}),
-          logs: [
-            ...(existingData[senderTab]?.consoles?.logs || []),
-            ...message.args,
-          ],
-        },
+    db.put({
+      tabId: sender.tab.id,
+      ...sender,
+      consoles: {
+        ...(existingTabData?.consoles || {}),
+        logs: [
+          ...(existingTabData?.consoles?.logs || []),
+          { createdAt: timestamp, message: message.args },
+        ],
       },
     });
   } else if (message.type === "CONSOLE_ERROR") {
     // Storage of Console Log will be happen here
-    await chrome.storage.sync.set({
-      ...existingData,
-      [senderTab]: {
-        ...(existingData[senderTab] || {}),
-        consoles: {
-          ...(existingData[senderTab]?.consoles || {}),
-          errors: [
-            ...(existingData[senderTab]?.consoles?.errors || []),
-            ...message.args,
-          ],
-        },
+    db.put({
+      tabId: sender.tab.id,
+      ...sender,
+      consoles: {
+        ...(existingTabData?.consoles || {}),
+        errors: [
+          ...(existingTabData?.consoles?.errors || []),
+          { createdAt: timestamp, message: message.args },
+        ],
       },
     });
   } else if (message.type === "CONSOLE_WARN") {
     // Storage of Console Log will be happen here
-    await chrome.storage.sync.set({
-      ...existingData,
-      [senderTab]: {
-        ...(existingData[senderTab] || {}),
-        consoles: {
-          ...(existingData[senderTab]?.consoles || {}),
-          warns: [
-            ...(existingData[senderTab]?.consoles?.warns || []),
-            ...message.args,
-          ],
-        },
+    db.put({
+      tabId: sender.tab.id,
+      ...sender,
+      consoles: {
+        ...(existingTabData?.consoles || {}),
+        warns: [
+          ...(existingTabData?.consoles?.warns || []),
+          { createdAt: timestamp, message: message.args },
+        ],
       },
     });
-  } else if (message.type === "GET_NETWORK_REQUESTS") {
-    console.log({ message });
-    // sendResponse(networkRequests);
   }
-
-  sendResponse(existingData);
+  // deleteOldRecords(timestamp, existingTabData);
 });
