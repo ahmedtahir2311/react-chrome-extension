@@ -3,17 +3,17 @@
 let db = null;
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("CrossCheck-Installed ");
+  console.log('CrossCheck-Installed ');
 
-  const dbName = "crosscheck-testDB";
+  const dbName = 'crosscheck-testDB';
   const dbVersion = 1;
 
   const dbOpenRequest = indexedDB.open(dbName, dbVersion);
   dbOpenRequest.onupgradeneeded = (e) => {
     //Making a Table
     db = dbOpenRequest.result;
-    db.createObjectStore("tabs_records", {
-      keyPath: "tabId",
+    db.createObjectStore('tabs_records', {
+      keyPath: 'tabId',
       // autoIncrement: true,
     });
   };
@@ -21,15 +21,15 @@ chrome.runtime.onInstalled.addListener(() => {
     db = dbOpenRequest.result;
 
     //Opening a Tranction
-    const transaction = db.transaction(["tabs_records"], "readwrite");
-    const tabs_records = transaction.objectStore("tabs_records");
+    const transaction = db.transaction(['tabs_records'], 'readwrite');
+    const tabs_records = transaction.objectStore('tabs_records');
     db.tabs_records = tabs_records;
 
     //making a Generic Add Function
     db.add = (
       payload,
-      tableName = "tabs_records",
-      permission = "readwrite"
+      tableName = 'tabs_records',
+      permission = 'readwrite'
     ) => {
       const transaction = db.transaction([tableName], permission);
       const tx = transaction.objectStore(tableName);
@@ -51,8 +51,8 @@ chrome.runtime.onInstalled.addListener(() => {
     //making a Generic Put Function
     db.put = (
       payload,
-      tableName = "tabs_records",
-      permission = "readwrite"
+      tableName = 'tabs_records',
+      permission = 'readwrite'
     ) => {
       const transaction = db.transaction([tableName], permission);
       const tx = transaction.objectStore(tableName);
@@ -73,8 +73,8 @@ chrome.runtime.onInstalled.addListener(() => {
     //making a Generic for getById #tabId passed
     db.getById = (
       tabId,
-      tableName = "tabs_records",
-      permission = "readwrite"
+      tableName = 'tabs_records',
+      permission = 'readwrite'
     ) => {
       try {
         //Opening a Tranction
@@ -101,7 +101,7 @@ chrome.runtime.onInstalled.addListener(() => {
     };
 
     //making a Generic for GetAll Function  #tabId not passed
-    db.getAll = (tableName = "tabs_records", permission = "readwrite") => {
+    db.getAll = (tableName = 'tabs_records', permission = 'readwrite') => {
       try {
         const transaction = db.transaction([tableName], permission);
         const tx = transaction.objectStore(tableName);
@@ -115,7 +115,7 @@ chrome.runtime.onInstalled.addListener(() => {
           };
           //onFailed
           getAllRequest.onerror = (event) => {
-            console.error("Record Fetching Failed : ", event.target.error);
+            console.error('Record Fetching Failed : ', event.target.error);
             reject(event.target.error);
           };
         });
@@ -127,7 +127,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
   dbOpenRequest.onerror = (e) => {
     db = null;
-    console.error("Error Creating Index Db ", dbOpenRequest);
+    console.error('Error Creating Index Db ', dbOpenRequest);
   };
 });
 
@@ -178,8 +178,8 @@ const captureNetworkData = () => {
         }
       }
     },
-    { urls: ["<all_urls>"] },
-    ["requestBody"]
+    { urls: ['<all_urls>'] },
+    ['requestBody']
   );
   chrome.webRequest.onBeforeSendHeaders.addListener(
     (requestDetails) => {
@@ -201,8 +201,8 @@ const captureNetworkData = () => {
         }
       }
     },
-    { urls: ["<all_urls>"] },
-    ["requestHeaders"]
+    { urls: ['<all_urls>'] },
+    ['requestHeaders']
   );
   chrome.webRequest.onCompleted.addListener(
     async (responseDetails) => {
@@ -240,8 +240,8 @@ const captureNetworkData = () => {
         }
       }
     },
-    { urls: ["<all_urls>"] },
-    ["responseHeaders"]
+    { urls: ['<all_urls>'] },
+    ['responseHeaders']
   );
 };
 
@@ -250,11 +250,13 @@ captureNetworkData();
 
 //Reading Out Consoles
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+  console.log('Received response:', message);
+
   const existingTabData = await db.getById(sender.tab.id);
   const timestamp = new Date().toISOString();
 
   // Assuming message.type is 'CONSOLE_LOG'
-  if (message.type === "CONSOLE_LOG") {
+  if (message.type === 'CONSOLE_LOG') {
     // Storage of Console Log will be happen here
     db.put({
       tabId: sender.tab.id,
@@ -267,7 +269,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         ],
       },
     });
-  } else if (message.type === "CONSOLE_ERROR") {
+  } else if (message.type === 'CONSOLE_ERROR') {
     // Storage of Console Log will be happen here
     db.put({
       tabId: sender.tab.id,
@@ -280,7 +282,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         ],
       },
     });
-  } else if (message.type === "CONSOLE_WARN") {
+  } else if (message.type === 'CONSOLE_WARN') {
     // Storage of Console Log will be happen here
     db.put({
       tabId: sender.tab.id,
