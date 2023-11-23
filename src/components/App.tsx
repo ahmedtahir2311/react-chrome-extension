@@ -13,6 +13,7 @@ const App = () => {
 
   return (
     <>
+      {/* {JSON.stringify(location)} */}
       <div className="data-body p-5">
         <div className="mb-5">
           <Logo />

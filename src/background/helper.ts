@@ -112,11 +112,18 @@ const getGeolocationDetails = () => {
   }
 };
 
+interface NetworkInformation {
+  type: string; // e.g., "wifi", "cellular", "ethernet"
+  downlink: number; // estimated effective bandwidth in megabits per second
+  effectiveType: string; // e.g., "slow-2g", "2g", "3g", "4g"
+  // Other properties may be available depending on the browser and platform
+}
+
 //get Connection Speed and Type
 function getInternetSpeedCategory() {
-  if ("connection" in navigator && navigator["connection"]) {
-    const connection: any = navigator["connection"];
-    const downlink = connection.downlink;
+  if (navigator && "connection" in navigator) {
+    const { downlink, effectiveType } =
+      navigator.connection as NetworkInformation;
     let connectionSpeed = "";
     if (downlink <= 0 || !downlink) {
       connectionSpeed = "No Internet";
@@ -127,11 +134,30 @@ function getInternetSpeedCategory() {
     } else if (downlink >= 100) {
       connectionSpeed = "Fast";
     }
-    return `${connectionSpeed} (${connection.effectiveType}) `;
+    return `${connectionSpeed} (${effectiveType}) `;
+  } else {
+    return `Connection API not supported by Browser`;
   }
 }
 
-const deleteOldRecords = (currentTime, existingTabData) => {
+//this Function will Filter Out the existing data that has passed two minutes
+export const filterOutOldData = (existingData) => {
+  // Convert current time to milliseconds
+  const currentTimeInMilliSeconds = new Date().getTime();
+  const thresholdMilliSeconds = 2 * 60 * 1000; // 2 minutes in milliseconds #threshold
+
+  // Filter out records where the time difference is less than or equal to 2 minutes (120,000 milliseconds)
+  const filteredData = existingData.filter((record) => {
+    const recordTimeStamp = new Date(record.createdAt).getTime();
+    const timeDifference = currentTimeInMilliSeconds - recordTimeStamp;
+    return timeDifference <= thresholdMilliSeconds;
+  });
+
+  return filteredData.length ? filteredData : [];
+};
+
+// #todo :  remove this Function
+const deleteOldRecords = async (currentTime, existingTabData) => {
   const threshold = 2 * 60 * 1000; // 2 minutes in milliseconds
 
   function filterOldRecords(records) {
@@ -149,7 +175,6 @@ const deleteOldRecords = (currentTime, existingTabData) => {
       warns: filterOldRecords(existingTabData?.consoles?.warns || []),
     },
   };
-  console.log({ updatedTabData });
 
   return updatedTabData;
 };

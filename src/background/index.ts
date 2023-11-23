@@ -1,5 +1,7 @@
 // import { getUserLocation } from './helper';
 
+import { filterOutOldData } from "./helper";
+
 let db = null;
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -220,7 +222,7 @@ const captureNetworkData = () => {
           db.put({
             tabId: tabId,
             ...existingTabRecords,
-            network: tabRequests[tabId],
+            network: filterOutOldData(tabRequests[tabId]),
           });
         }
       }
@@ -253,7 +255,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       consoles: {
         ...(existingTabData?.consoles || {}),
         logs: [
-          ...(existingTabData?.consoles?.logs || []),
+          ...filterOutOldData(existingTabData?.consoles?.logs || []),
           { createdAt: timestamp, message: message.args },
         ],
       },
@@ -266,7 +268,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       consoles: {
         ...(existingTabData?.consoles || {}),
         errors: [
-          ...(existingTabData?.consoles?.errors || []),
+          ...filterOutOldData(existingTabData?.consoles?.errors || []),
           { createdAt: timestamp, message: message.args },
         ],
       },
@@ -279,7 +281,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       consoles: {
         ...(existingTabData?.consoles || {}),
         warns: [
-          ...(existingTabData?.consoles?.warns || []),
+          ...filterOutOldData(existingTabData?.consoles?.warns || []),
           { createdAt: timestamp, message: message.args },
         ],
       },
