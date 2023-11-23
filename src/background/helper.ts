@@ -82,8 +82,35 @@ function getScreenDimensions() {
   return `${screenWidth}x${screenHeight}`;
 }
 
-//get Country
-//No-solution
+//get GeoLocation Details
+const getGeolocationDetails = () => {
+  if ("geolocation" in navigator) {
+    // Check if geolocation is supported
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        console.log("Latitude: " + position.coords.latitude);
+        console.log("Longitude: " + position.coords.longitude);
+        // Hitting an Open GeoLocation API to get the Location details
+        fetch(
+          `https://api.opencagedata.com/geocode/v1/json?q=${position.coords.latitude}+${position.coords.longitude}&key=898e0105618f47279980ce9dde234108`
+        )
+          .then((res) => res.json())
+          .then((res) => {
+            // #todo: storage of location
+            console.log(res.results.components);
+          });
+      },
+      function (error) {
+        console.error(
+          "Error occurred while Getting Geolocation: " + error.message
+        );
+      }
+    );
+  } else {
+    console.log("Geolocation is not supported by this browser.");
+    // Handle case where geolocation is not supported
+  }
+};
 
 //get Connection Speed and Type
 function getInternetSpeedCategory() {
@@ -104,7 +131,7 @@ function getInternetSpeedCategory() {
   }
 }
 
-export const deleteOldRecords = (currentTime, existingTabData) => {
+const deleteOldRecords = (currentTime, existingTabData) => {
   const threshold = 2 * 60 * 1000; // 2 minutes in milliseconds
 
   function filterOldRecords(records) {
