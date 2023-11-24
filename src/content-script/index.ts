@@ -5,10 +5,16 @@ function injectScript(file, node) {
   s.setAttribute("type", "text/javascript");
   s.setAttribute("src", file);
   th.appendChild(s);
-  console.log("Content-Script Running");
+  console.log("injection Running");
 }
 
 injectScript(chrome.runtime.getURL("inject.js"), "body");
+console.log("Content-Script Running");
+
+window.document.addEventListener("DOMContentLoaded", () => {
+  const body = document.getElementsByTagName("body");
+  console.log(body);
+});
 
 // Listen for messages from the inject.js script
 window.addEventListener("message", async (event) => {
