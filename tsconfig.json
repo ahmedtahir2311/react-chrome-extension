@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
         "jsx": "react",
         "module": "commonjs",
         "target": "es5",
@@ -7,6 +8,6 @@
         
         "esModuleInterop": true,
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/content-script/index.js"],
     "exclude": ["node_modules"]
 }

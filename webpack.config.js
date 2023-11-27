@@ -9,9 +9,11 @@ module.exports = {
   devtool: "cheap-module-source-map",
   entry: {
     index: path.resolve("./src/components/index.tsx"),
+    modal: path.resolve("./src/components/components/Modal/simpleDiv.tsx"),
     background: path.resolve("./src/background/index.ts"),
     "content-script": path.resolve("./src/content-script/index.ts"),
     inject: path.resolve("./src/inject/index.ts"),
+    // "rrweb-inject": path.resolve("./src/inject/rrweb-injection.js"),
   },
   module: {
     rules: [
@@ -48,6 +50,7 @@ module.exports = {
       },
     ],
   },
+
   plugins: [
     new CopyPlugin({
       patterns: [
@@ -57,7 +60,7 @@ module.exports = {
         },
       ],
     }),
-    ...getHtmlPlugins(["index"]),
+    ...getHtmlPlugins(["index", "modal"]),
   ],
 
   resolve: {
@@ -65,6 +68,7 @@ module.exports = {
   },
   output: {
     filename: "[name].js",
+    path: path.resolve(__dirname, "dist"),
   },
   optimization: {
     splitChunks: {

@@ -1,4 +1,4 @@
-import { someFunction } from "../components/components/Modal/simpleDiv";
+import { record } from "rrweb";
 
 // content.js
 function injectScript(file, node) {
@@ -7,25 +7,32 @@ function injectScript(file, node) {
   s.setAttribute("type", "text/javascript");
   s.setAttribute("src", file);
   th.appendChild(s);
-  injectModal();
   console.log("injection Running");
 }
 
-const injectModal = () => {
-  const body = document.querySelector("body");
-  const modalDivToBeInserted = document.createElement("div");
-  modalDivToBeInserted.id = "react-modal";
+// const injectModal = async (path, node) => {
+//   try {
+//     const app = document.createElement("div");
+//     app.id = "react-modal";
+//     document.body.append(app);
 
-  if (body) {
-    body.appendChild(modalDivToBeInserted);
-  }
-  const container = document.getElementById("react-modal");
-  console.log(container);
-  // someFunction(container);
-};
+//     // const src = chrome?.runtime?.getURL("modal.js");
+//     // await import(src);
+//   } catch (error) {
+//     console.log("Error loading modal", error);
+//   }
+// };
 
 injectScript(chrome.runtime.getURL("inject.js"), "body");
-
+// injectScript(chrome.runtime.getURL("rrweb-inject.js"), "body");
+// injectModal(chrome.runtime.getURL("modal.js"), "body");
+// record({
+//   emit(event) {
+//     // Send each recorded event to the background script
+//     console.log("event in content.js", event);
+//     chrome.runtime.sendMessage({ type: "RECORD_EVENT", event: event });
+//   },
+// });
 // Listen for messages from the inject.js script
 window.addEventListener("message", async (event) => {
   // Only accept messages from the same frame
